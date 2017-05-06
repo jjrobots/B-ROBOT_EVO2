@@ -5,8 +5,8 @@
 // This code doesn´t need external libraries
 // Author: JJROBOTS.COM
 // Date: 02/09/2014
-// Updated: 08/03/2017
-// Version: 2.8
+// Updated: 06/05/2017
+// Version: 2.81
 // License: GPL v2
 // Project URL: http://jjrobots.com/b-robot (Features,documentation,build instructions,how it works, SHOP,...)
 // New updates:
@@ -214,8 +214,7 @@ void setup()
 #else
   delay(1000);
 #endif
-  Serial.println("BROBOT by JJROBOTS v2.8");
-
+  Serial.println("JJROBOTS");
   delay(200);
   Serial.println("Don't move for 10 sec...");
   MPU6050_setup();  // setup MPU6050 IMU
@@ -264,19 +263,14 @@ void setup()
   ESPsendCommand(cmd, "OK", 6);
 #endif
   // Start UDP SERVER on port 2222, telemetry port 2223
-  //Serial.println("Start UDP server");
-  //ESPsendCommand("AT+CIPMUX=0", "OK", 3);  // Single connection mode
-  //ESPsendCommand("AT+CIPMODE=1", "OK", 3); // Transparent mode
-  //char Telemetry[80];
-  //strcpy(Telemetry,"AT+CIPSTART=\"UDP\",\"");
-  //strcat(Telemetry,TELEMETRY);
-  //strcat(Telemetry,"\",2223,2222,0");
-  //ESPsendCommand(Telemetry, "OK", 3);
-
-  // Start TCP SERVER
-  ESPsendCommand("AT+CIPMUX=1", "OK", 3);  // Single connection mode
+  Serial.println("Start UDP server");
+  ESPsendCommand("AT+CIPMUX=0", "OK", 3);  // Single connection mode
   ESPsendCommand("AT+CIPMODE=1", "OK", 3); // Transparent mode
-  ESPsendCommand("AT+CIPSERVER=1,2222", "OK", 3); // TCP server
+  char Telemetry[80];
+  strcpy(Telemetry,"AT+CIPSTART=\"UDP\",\"");
+  strcat(Telemetry,TELEMETRY);
+  strcat(Telemetry,"\",2223,2222,0");
+  ESPsendCommand(Telemetry, "OK", 3); 
 
   // Calibrate gyros
   MPU6050_calibrate();
@@ -330,7 +324,7 @@ void setup()
   Serial.print("BATT:");
   Serial.println(BatteryValue);
 #endif
-
+  Serial.println("BROBOT by JJROBOTS v2.81");
   Serial.println("Start...");
   timer_old = micros();
 }
