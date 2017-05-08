@@ -576,8 +576,8 @@ void MPU6050_read_3axis()
   // read 14 bytes (gyros, temp and accels)
   error = MPU6050_read (MPU6050_ACCEL_XOUT_H, (uint8_t *) &accel_t_gyro, sizeof(accel_t_gyro));
   if (error != 0) {
-    //Serial.print("MPU6050 Error:");
-    //Serial.println(error);
+    Serial.print("MPU6050 Error:");
+    Serial.println(error);
   }
   // swap bytes
   SWAP (accel_t_gyro.reg.x_accel_h, accel_t_gyro.reg.x_accel_l);
@@ -617,14 +617,14 @@ void MPU6050_read_1axis()
   // read X accel
   error = MPU6050_read(MPU6050_ACCEL_XOUT_H, (uint8_t *) &accel_t_gyro.reg.x_accel_h, 6);
   if (error != 0) {
-    //Serial.print("MPU6050 Error:");
-    //Serial.println(error);
+    Serial.print("MPU6050 Error:");
+    Serial.println(error);
   }
   // read X gyro
   error = MPU6050_read(MPU6050_GYRO_XOUT_H, (uint8_t *) &accel_t_gyro.reg.x_gyro_h, 2);
   if (error != 0) {
-    //Serial.print("MPU6050 Error:");
-    //Serial.println(error);
+    Serial.print("MPU6050 Error:");
+    Serial.println(error);
   }
   SWAP (accel_t_gyro.reg.x_accel_h, accel_t_gyro.reg.y_accel_l);
   SWAP (accel_t_gyro.reg.z_accel_h, accel_t_gyro.reg.z_accel_l);
@@ -645,8 +645,8 @@ bool MPU6050_newData()
 
   error = MPU6050_read(MPU6050_INT_STATUS, &status, 1);
   if (error != 0) {
-    //Serial.print("MPU6050 Error:");
-    //Serial.println(error);
+    Serial.print("MPU6050 Error:");
+    Serial.println(error);
   }
   if (status & (0b00000001)) // Data ready?
     return true;

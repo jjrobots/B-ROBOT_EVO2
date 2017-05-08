@@ -15,7 +15,7 @@
 
 
 // for DEBUG uncomment this lines...
-//#define OSCDEBUG 3
+//#define OSCDEBUG 0
 
 
 char UDPBuffer[8]; // input message buffer
@@ -105,7 +105,6 @@ void OSC_MsgRead()
       UDPBuffer[i] = UDPBuffer[i - 1];
     }
     UDPBuffer[0] = Serial1.read();
-    Serial.print(UDPBuffer[0]);
 #ifdef OSCDEBUG3
     Serial.print(UDPBuffer[0]);
 #endif
