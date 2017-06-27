@@ -98,8 +98,6 @@ void OSC_MsgRead()
 
   // New bytes available to process?
   if (Serial1.available() > 0) {
-    //Serial.print("B:");
-    //Serial.println(Serial1_available());
     // We rotate the Buffer (we could implement a ring buffer in future)
     for (i = 7; i > 0; i--) {
       UDPBuffer[i] = UDPBuffer[i - 1];
@@ -211,7 +209,7 @@ void OSC_MsgRead()
             }
 #ifdef OSCDEBUG
             Serial.print("$F1:");
-            Serial.println(OSCfadder[0]);
+            Serial.println(OSCfader[0]);
 #endif
             break;
           case 2:
@@ -224,21 +222,21 @@ void OSC_MsgRead()
             }
 #ifdef OSCDEBUG
             Serial.print("$F2:");
-            Serial.println(OSCfadder[1]);
+            Serial.println(OSCfader[1]);
 #endif
             break;
           case 3:
             OSCfader[2] = OSC_extractParamFloat(0);
 #ifdef OSCDEBUG
             Serial.print("$F3:");
-            Serial.println(OSCfadder[2]);
+            Serial.println(OSCfader[2]);
 #endif
             break;
           case 4:
             OSCfader[3] = OSC_extractParamFloat(0);
 #ifdef OSCDEBUG
             Serial.print("$F4:");
-            Serial.println(OSCfadder[3]);
+            Serial.println(OSCfader[3]);
 #endif
             break;
           case 11:

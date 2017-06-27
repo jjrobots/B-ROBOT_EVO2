@@ -1,23 +1,23 @@
 // BROBOT EVO 2 by JJROBOTS
-// SELF BALANCE ARDUINO ROBOT WITH STEPPER MOTORS
+// SELF BALANCE ARDUINO ROBOT WITH STEPPER MOTORS CONTROLLED WITH YOUR SMARTPHONE
 // JJROBOTS BROBOT KIT: (Arduino Leonardo + BROBOT ELECTRONIC BRAIN SHIELD + STEPPER MOTOR drivers)
 // This code is prepared for new BROBOT shield  with ESP8266 Wifi module
-// This code doesn´t need external libraries
 // Author: JJROBOTS.COM
 // Date: 02/09/2014
-// Updated: 06/05/2017
-// Version: 2.81
+// Updated: 25/06/2017
+// Version: 2.82
 // License: GPL v2
-// Project URL: http://jjrobots.com/b-robot (Features,documentation,build instructions,how it works, SHOP,...)
+// Compiled and tested with Arduino 1.6.8. This new version of code does not need external libraries (only Arduino standard libraries)
+// Project URL: http://jjrobots.com/b-robot-evo-2-much-more-than-a-self-balancing-robot (Features,documentation,build instructions,how it works, SHOP,...)
 // New updates:
-//   - New default parameters specially tuned for BROBOT EVO 2 version
-//   - New Move mode with position control (for externally programming the robot)
+//   - New default parameters specially tuned for BROBOT EVO 2 version (More agile, more stable...)
+//   - New Move mode with position control (for externally programming the robot with a Blockly or pyhton programming interfaces)
 //   - New telemtry packets send to TELEMETRY IP for monitoring Battery, Angle, ... (old battery packets for touch osc not working now)
 //   - Default telemetry server is 192.168.4.2 (first client connected to the robot)
 //  Get the free android app (jjrobots) from google play. For IOS users you need to use TouchOSC App + special template (info on jjrobots page)
 //  Thanks to our users on the forum for the new ideas. Specially sasa999, KomX, ...
 
-// The board needs at least 10-15 seconds with no motion (robot steady) at beginning to give good values...
+// The board needs at least 10-15 seconds with no motion (robot steady) at beginning to give good values... Robot move slightly when it´s ready!
 // MPU6050 IMU connected via I2C bus. Angle estimation using complementary filter (fusion between gyro and accel)
 // Angle calculations and control part is running at 100Hz
 
@@ -61,14 +61,14 @@
 #define MAX_TARGET_ANGLE 14
 
 // PRO MODE = MORE AGGRESSIVE (MAXIMUN SETTINGS)
-#define MAX_THROTTLE_PRO 860 
-#define MAX_STEERING_PRO 280
-#define MAX_TARGET_ANGLE_PRO 32 
+#define MAX_THROTTLE_PRO 780   // Max recommended value: 860
+#define MAX_STEERING_PRO 260   // Max recommended value: 280
+#define MAX_TARGET_ANGLE_PRO 26   // Max recommended value: 32
 
 // Default control terms for EVO 2
 #define KP 0.32       
 #define KD 0.050     
-#define KP_THROTTLE 0.075 
+#define KP_THROTTLE 0.080 
 #define KI_THROTTLE 0.1 
 #define KP_POSITION 0.06  
 #define KD_POSITION 0.45  
@@ -84,12 +84,15 @@
 #define ITERM_MAX_ERROR 30   // Iterm windup constants for PI control 
 #define ITERM_MAX 10000
 
-#define ANGLE_OFFSET -1.0  // Offset angle for balance (to compensate robot own weitght distribution)
+#define ANGLE_OFFSET 0.0  // Offset angle for balance (to compensate robot own weight distribution)
 
 // Servo definitions
 #define SERVO_AUX_NEUTRO 1500  // Servo neutral position
 #define SERVO_MIN_PULSEWIDTH 700
 #define SERVO_MAX_PULSEWIDTH 2500
+
+#define SERVO2_NEUTRO 1500
+#define SERVO2_RANGE 1400
 
 // Telemetry
 #define TELEMETRY_BATTERY 1
@@ -97,7 +100,7 @@
 //#define TELEMETRY_DEBUG 1  // Dont use TELEMETRY_ANGLE and TELEMETRY_DEBUG at the same time!
 
 #define ZERO_SPEED 65535
-#define MAX_ACCEL 15      // Maximun motor acceleration (MAX RECOMMENDED VALUE: 20) (default:15)
+#define MAX_ACCEL 14      // Maximun motor acceleration (MAX RECOMMENDED VALUE: 20) (default:14)
 
 #define MICROSTEPPING 16   // 8 or 16 for 1/8 or 1/16 driver microstepping (default:16)
 
@@ -125,6 +128,7 @@ float dt;
 // Angle of the robot (used for stability control)
 float angle_adjusted;
 float angle_adjusted_Old;
+float angle_adjusted_filtered=0.0;
 
 // Default control values from constant definitions
 float Kp = KP;
@@ -152,6 +156,7 @@ float max_throttle = MAX_THROTTLE;
 float max_steering = MAX_STEERING;
 float max_target_angle = MAX_TARGET_ANGLE;
 float control_output;
+float angle_offset = ANGLE_OFFSET;
 
 boolean positionControlMode = false;
 uint8_t mode;  // mode = 0 Normal mode, mode = 1 Pro mode (More agressive)
@@ -311,20 +316,23 @@ void setup()
     setMotorSpeedM1(5);
     setMotorSpeedM2(5);
     BROBOT_moveServo1(SERVO_AUX_NEUTRO + 100);
+    BROBOT_moveServo2(SERVO2_NEUTRO + 100);
     delay(200);
     setMotorSpeedM1(-5);
     setMotorSpeedM2(-5);
     BROBOT_moveServo1(SERVO_AUX_NEUTRO - 100);
+    BROBOT_moveServo2(SERVO2_NEUTRO - 100);
     delay(200);
   }
   BROBOT_moveServo1(SERVO_AUX_NEUTRO);
+  BROBOT_moveServo2(SERVO2_NEUTRO);
 
  #if TELEMETRY_BATTERY==1
   BatteryValue = BROBOT_readBattery(true);
   Serial.print("BATT:");
   Serial.println(BatteryValue);
 #endif
-  Serial.println("BROBOT by JJROBOTS v2.81");
+  Serial.println("BROBOT by JJROBOTS v2.82");
   Serial.println("Start...");
   timer_old = micros();
 }
@@ -414,12 +422,19 @@ void loop()
 
     angle_adjusted_Old = angle_adjusted;
     // Get new orientation angle from IMU (MPU6050)
-    angle_adjusted = MPU6050_getAngle(dt) + ANGLE_OFFSET;
-
+    float MPU_sensor_angle = MPU6050_getAngle(dt);
+    angle_adjusted = MPU_sensor_angle + angle_offset;
+    if ((MPU_sensor_angle>-15)&&(MPU_sensor_angle<15))
+      angle_adjusted_filtered = angle_adjusted_filtered*0.99 + MPU_sensor_angle*0.01;
+      
 #if DEBUG==1
     Serial.print(dt);
     Serial.print(" ");
-    Serial.println(angle_adjusted);
+    Serial.print(angle_offset);
+    Serial.print(" ");
+    Serial.print(angle_adjusted);
+    Serial.print(",");
+    Serial.println(angle_adjusted_filtered);
 #endif
     //Serial.print("\t");
 
@@ -480,7 +495,7 @@ void loop()
 
     int angle_ready;
     if (OSCpush[0])     // If we press the SERVO button we start to move
-      angle_ready = 80;
+      angle_ready = 82;
     else
       angle_ready = 74;  // Default angle
     if ((angle_adjusted < angle_ready) && (angle_adjusted > -angle_ready)) // Is robot ready (upright?)
@@ -504,6 +519,10 @@ void loop()
       // RESET steps
       steps1 = 0;
       steps2 = 0;
+      positionControlMode = false;
+      OSCmove_mode = false;
+      throttle = 0;
+      steering = 0;
     }
 
     // Push1 Move servo arm
@@ -516,6 +535,9 @@ void loop()
     }
     else
       BROBOT_moveServo1(SERVO_AUX_NEUTRO);
+
+    // Servo2
+    BROBOT_moveServo2(SERVO2_NEUTRO + (OSCfader[2] - 0.5) * SERVO2_RANGE);
 
     // Normal condition?
     if ((angle_adjusted < 56) && (angle_adjusted > -56))

@@ -70,8 +70,8 @@ void BROBOT_moveServo2(int pwm)
   pwm = constrain(pwm,SERVO2_MIN_PULSEWIDTH,SERVO2_MAX_PULSEWIDTH)>>3;  // Check max values and Resolution: 8us
   // 11 bits => 3 MSB bits on TC4H, LSB bits on OCR4B
   TC4H = pwm>>8;
-  OCR4A = pwm & 0xFF;  // Old 2.0 boards servo2 output
-  OCR4D = pwm & 0xFF;  // New 2.1 boards servo2 output
+  OCR4A = pwm & 0xFF;  // 2.0 or 2.3  boards servo2 output
+  OCR4D = pwm & 0xFF;  // 2.1 or 2.4  boards servo2 output
 }
 
 // output : Battery voltage*10 (aprox) and noise filtered

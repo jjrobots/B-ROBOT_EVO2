@@ -39,6 +39,14 @@ void readControlParameters()
   Serial.println(Ki_thr_user);
 #endif
 
+  // Calibration mode??
+  if (OSCpush[2]==1)
+  {
+    Serial.print("Calibration MODE ");
+    angle_offset = angle_adjusted_filtered;
+    Serial.println(angle_offset);
+  }
+
   // Kill robot => Sleep
   while (OSCtoggle[0] == 1)
   {
