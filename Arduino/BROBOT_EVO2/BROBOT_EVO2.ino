@@ -252,7 +252,7 @@ void setup()
   ESPsendCommand(auxCommand, "OK", 4);
 #endif
   ESPsendCommand("AT+CIPSTA?", "OK", 4);
-#else  // Deafault : we generate a wifi network
+#else  // Default : we generate a wifi network
   Serial1.println("AT+CIPSTAMAC?");
   ESPgetMac();
   //Serial.print("MAC:");
@@ -308,7 +308,7 @@ void setup()
   digitalWrite(4, LOW);   // Enable stepper drivers
   // Enable TIMERs interrupts
   TIMSK1 |= (1 << OCIE1A); // Enable Timer1 interrupt
-  TIMSK3 |= (1 << OCIE1A); // Enable Timer1 interrupt
+  TIMSK3 |= (1 << OCIE1A); // Enable Timer3 interrupt
 
   // Little motor vibration and servo move to indicate that robot is ready
   for (uint8_t k = 0; k < 5; k++)
