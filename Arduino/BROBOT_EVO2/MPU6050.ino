@@ -500,9 +500,9 @@ void MPU6050_calibrate()
   float dev;
   int16_t values[100];
   bool gyro_cal_ok = false;
-  
+
   delay(500);
-  while (!gyro_cal_ok){
+  while (!gyro_cal_ok) {
     Serial.println("Gyro calibration... DONT MOVE!");
     // we take 100 measurements in 4 seconds
     for (i = 0; i < 100; i++)

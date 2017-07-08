@@ -39,7 +39,7 @@
 // OSC controls:
 //    fader1: Throttle (0.0-1.0) OSC message: /1/fader1
 //    fader2: Steering (0.0-1.0) OSC message: /1/fader2
-//    push1: Move servo arm (and robot raiseup) OSC message /1/push1 
+//    push1: Move servo arm (and robot raiseup) OSC message /1/push1
 //    if you enable the touchMessage on TouchOSC options, controls return to center automatically when you lift your fingers
 //    PRO mode (PRO button). On PRO mode steering and throttle are more aggressive
 //    PAGE2: PID adjustements [optional][dont touch if you dont know what you are doing...;-) ]
@@ -51,7 +51,7 @@
 //#define WIFI_SSID "YOUR_WIFI"
 //#define WIFI_PASSWORD "YOUR_PASSWORD"
 //#define WIFI_IP "192.168.1.101"  // Force ROBOT IP
-//#define TELEMETRY "192.168.1.38" // Tlemetry server port 2223
+//#define TELEMETRY "192.168.1.38" // Telemetry server port 2223
 
 #define TELEMETRY "192.168.4.2" // Default telemetry server (first client) port 2223
 
@@ -66,17 +66,17 @@
 #define MAX_TARGET_ANGLE_PRO 26   // Max recommended value: 32
 
 // Default control terms for EVO 2
-#define KP 0.32       
-#define KD 0.050     
-#define KP_THROTTLE 0.080 
-#define KI_THROTTLE 0.1 
-#define KP_POSITION 0.06  
-#define KD_POSITION 0.45  
+#define KP 0.32
+#define KD 0.050
+#define KP_THROTTLE 0.080
+#define KI_THROTTLE 0.1
+#define KP_POSITION 0.06
+#define KD_POSITION 0.45
 //#define KI_POSITION 0.02
 
 // Control gains for raiseup (the raiseup movement requiere special control parameters)
-#define KP_RAISEUP 0.1   
-#define KD_RAISEUP 0.16   
+#define KP_RAISEUP 0.1
+#define KD_RAISEUP 0.16
 #define KP_THROTTLE_RAISEUP 0   // No speed control on raiseup
 #define KI_THROTTLE_RAISEUP 0.0
 
@@ -128,7 +128,7 @@ float dt;
 // Angle of the robot (used for stability control)
 float angle_adjusted;
 float angle_adjusted_Old;
-float angle_adjusted_filtered=0.0;
+float angle_adjusted_filtered = 0.0;
 
 // Default control values from constant definitions
 float Kp = KP;
@@ -252,7 +252,7 @@ void setup()
   ESPsendCommand(auxCommand, "OK", 4);
 #endif
   ESPsendCommand("AT+CIPSTA?", "OK", 4);
-#else  // Deafault : we generate a wifi network
+#else  // Default : we generate a wifi network
   Serial1.println("AT+CIPSTAMAC?");
   ESPgetMac();
   //Serial.print("MAC:");
@@ -272,10 +272,10 @@ void setup()
   ESPsendCommand("AT+CIPMUX=0", "OK", 3);  // Single connection mode
   ESPsendCommand("AT+CIPMODE=1", "OK", 3); // Transparent mode
   char Telemetry[80];
-  strcpy(Telemetry,"AT+CIPSTART=\"UDP\",\"");
-  strcat(Telemetry,TELEMETRY);
-  strcat(Telemetry,"\",2223,2222,0");
-  ESPsendCommand(Telemetry, "OK", 3); 
+  strcpy(Telemetry, "AT+CIPSTART=\"UDP\",\"");
+  strcat(Telemetry, TELEMETRY);
+  strcat(Telemetry, "\",2223,2222,0");
+  ESPsendCommand(Telemetry, "OK", 3);
 
   // Calibrate gyros
   MPU6050_calibrate();
@@ -308,7 +308,7 @@ void setup()
   digitalWrite(4, LOW);   // Enable stepper drivers
   // Enable TIMERs interrupts
   TIMSK1 |= (1 << OCIE1A); // Enable Timer1 interrupt
-  TIMSK3 |= (1 << OCIE1A); // Enable Timer1 interrupt
+  TIMSK3 |= (1 << OCIE1A); // Enable Timer3 interrupt
 
   // Little motor vibration and servo move to indicate that robot is ready
   for (uint8_t k = 0; k < 5; k++)
@@ -327,7 +327,7 @@ void setup()
   BROBOT_moveServo1(SERVO_AUX_NEUTRO);
   BROBOT_moveServo2(SERVO2_NEUTRO);
 
- #if TELEMETRY_BATTERY==1
+#if TELEMETRY_BATTERY==1
   BatteryValue = BROBOT_readBattery(true);
   Serial.print("BATT:");
   Serial.println(BatteryValue);
@@ -424,9 +424,9 @@ void loop()
     // Get new orientation angle from IMU (MPU6050)
     float MPU_sensor_angle = MPU6050_getAngle(dt);
     angle_adjusted = MPU_sensor_angle + angle_offset;
-    if ((MPU_sensor_angle>-15)&&(MPU_sensor_angle<15))
-      angle_adjusted_filtered = angle_adjusted_filtered*0.99 + MPU_sensor_angle*0.01;
-      
+    if ((MPU_sensor_angle > -15) && (MPU_sensor_angle < 15))
+      angle_adjusted_filtered = angle_adjusted_filtered * 0.99 + MPU_sensor_angle * 0.01;
+
 #if DEBUG==1
     Serial.print(dt);
     Serial.print(" ");
@@ -440,7 +440,7 @@ void loop()
 
     // We calculate the estimated robot speed:
     // Estimated_Speed = angular_velocity_of_stepper_motors(combined) - angular_velocity_of_robot(angle measured by IMU)
-    actual_robot_speed = (speed_M1 + speed_M2) / 2; // Positive: forward  
+    actual_robot_speed = (speed_M1 + speed_M2) / 2; // Positive: forward
 
     int16_t angular_velocity = (angle_adjusted - angle_adjusted_Old) * 25.0; // 25 is an empirical extracted factor to adjust for real units
     int16_t estimated_speed = -actual_robot_speed + angular_velocity;
@@ -564,7 +564,7 @@ void loop()
     // Telemetry here?
 #if TELEMETRY_ANGLE==1
     char auxS[25];
-    int ang_out = constrain(int(angle_adjusted * 10),-900,900);
+    int ang_out = constrain(int(angle_adjusted * 10), -900, 900);
     sprintf(auxS, "$tA,%+04d", ang_out);
     Serial1.println(auxS);
 #endif

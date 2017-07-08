@@ -40,7 +40,7 @@ void readControlParameters()
 #endif
 
   // Calibration mode??
-  if (OSCpush[2]==1)
+  if (OSCpush[2] == 1)
   {
     Serial.print("Calibration MODE ");
     angle_offset = angle_adjusted_filtered;
@@ -147,6 +147,4 @@ int ESPsendCommand(char *command, String stopstr, int timeout_secs)
   ESPwait(stopstr, timeout_secs);
   delay(250);
 }
-
-
 

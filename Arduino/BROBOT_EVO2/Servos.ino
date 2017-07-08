@@ -23,16 +23,16 @@ int battery;
 // Resolution: 8us per step (this is OK for servos, around 175 steps for typical servo)
 void BROBOT_initServo()
 {
-int temp;
+  int temp;
 
   // Initialize Timer4 as Fast PWM
-  TCCR4A = (1<<PWM4A)|(1<<PWM4B);
+  TCCR4A = (1 << PWM4A) | (1 << PWM4B);
   TCCR4B = 0;
-  TCCR4C = (1<<PWM4D);
+  TCCR4C = (1 << PWM4D);
   TCCR4D = 0;
-  TCCR4E = (1<<ENHC4); // Enhaced -> 11 bits
+  TCCR4E = (1 << ENHC4); // Enhaced -> 11 bits
 
-  temp = 1500>>3;
+  temp = 1500 >> 3;
   TC4H = temp >> 8;
   OCR4B = temp & 0xff;
 
@@ -51,25 +51,25 @@ int temp;
   DDRD |= (1 << 7);  // OC4D = PD7 (Pin6 on Leonardo board)
 
   //Enable OC4A and OC4B and OCR4D output
-  TCCR4A |= (1<<COM4B1)|(1<<COM4A1); 
-  TCCR4C |= (1<<COM4D1);
+  TCCR4A |= (1 << COM4B1) | (1 << COM4A1);
+  TCCR4C |= (1 << COM4D1);
   // set prescaler to 256 and enable timer    16Mhz/256/1024 = 61Hz (16.3ms)
-  TCCR4B = (1 << CS43)|(1 << CS40);
+  TCCR4B = (1 << CS43) | (1 << CS40);
 }
 
 void BROBOT_moveServo1(int pwm)
 {
-  pwm = constrain(pwm,SERVO1_MIN_PULSEWIDTH,SERVO1_MAX_PULSEWIDTH)>>3;  // Check max values and Resolution: 8us
+  pwm = constrain(pwm, SERVO1_MIN_PULSEWIDTH, SERVO1_MAX_PULSEWIDTH) >> 3; // Check max values and Resolution: 8us
   // 11 bits => 3 MSB bits on TC4H, LSB bits on OCR4B
-  TC4H = pwm>>8;
+  TC4H = pwm >> 8;
   OCR4B = pwm & 0xFF;
 }
 
 void BROBOT_moveServo2(int pwm)
 {
-  pwm = constrain(pwm,SERVO2_MIN_PULSEWIDTH,SERVO2_MAX_PULSEWIDTH)>>3;  // Check max values and Resolution: 8us
+  pwm = constrain(pwm, SERVO2_MIN_PULSEWIDTH, SERVO2_MAX_PULSEWIDTH) >> 3; // Check max values and Resolution: 8us
   // 11 bits => 3 MSB bits on TC4H, LSB bits on OCR4B
-  TC4H = pwm>>8;
+  TC4H = pwm >> 8;
   OCR4A = pwm & 0xFF;  // 2.0 or 2.3  boards servo2 output
   OCR4D = pwm & 0xFF;  // 2.1 or 2.4  boards servo2 output
 }
@@ -78,10 +78,9 @@ void BROBOT_moveServo2(int pwm)
 int BROBOT_readBattery(bool first_time)
 {
   if (first_time)
-	battery = analogRead(5)/BATT_VOLT_FACTOR;
+    battery = analogRead(5) / BATT_VOLT_FACTOR;
   else
-    battery = (battery*9 + (analogRead(5)/BATT_VOLT_FACTOR))/10;
+    battery = (battery * 9 + (analogRead(5) / BATT_VOLT_FACTOR)) / 10;
   return battery;
 }
-
 
